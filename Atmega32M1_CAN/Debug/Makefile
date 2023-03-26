@@ -33,7 +33,8 @@ LINKER_SCRIPT_DEP:=
 
 # Every subdirectory with source files must be described here
 SUBDIRS :=  \
-../can
+../can \
+../timer
 
 
 # Add inputs and outputs from these tool invocations to the build variables 
@@ -41,7 +42,8 @@ C_SRCS +=  \
 ../can/can_drv.c \
 ../can/can_lib.c \
 ../can/can_network.c \
-../main.c
+../main.c \
+../timer/timer.c
 
 
 PREPROCESSING_SRCS += 
@@ -54,25 +56,29 @@ OBJS +=  \
 can/can_drv.o \
 can/can_lib.o \
 can/can_network.o \
-main.o
+main.o \
+timer/timer.o
 
 OBJS_AS_ARGS +=  \
 can/can_drv.o \
 can/can_lib.o \
 can/can_network.o \
-main.o
+main.o \
+timer/timer.o
 
 C_DEPS +=  \
 can/can_drv.d \
 can/can_lib.d \
 can/can_network.d \
-main.d
+main.d \
+timer/timer.d
 
 C_DEPS_AS_ARGS +=  \
 can/can_drv.d \
 can/can_lib.d \
 can/can_network.d \
-main.d
+main.d \
+timer/timer.d
 
 OUTPUT_FILE_PATH +=Atmega32M1_CAN.elf
 
@@ -110,6 +116,13 @@ can/can_network.o: ../can/can_network.c
 	
 
 ./main.o: .././main.c
+	@echo Building file: $<
+	@echo Invoking: AVR/GNU C Compiler : 5.4.0
+	$(QUOTE)C:\Program Files (x86)\Atmel\Studio\7.0\toolchain\avr8\avr8-gnu-toolchain\bin\avr-gcc.exe$(QUOTE)  -x c -funsigned-char -funsigned-bitfields -DDEBUG -DF_CPU=16000000  -I"C:\Program Files (x86)\Atmel\Studio\7.0\Packs\atmel\ATmega_DFP\1.7.374\include"  -Og -ffunction-sections -fdata-sections -fpack-struct -fshort-enums -g2 -Wall -mmcu=atmega32m1 -B "C:\Program Files (x86)\Atmel\Studio\7.0\Packs\atmel\ATmega_DFP\1.7.374\gcc\dev\atmega32m1" -c -std=gnu99 -MD -MP -MF "$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -MT"$(@:%.o=%.o)"   -o "$@" "$<" 
+	@echo Finished building: $<
+	
+
+timer/timer.o: ../timer/timer.c
 	@echo Building file: $<
 	@echo Invoking: AVR/GNU C Compiler : 5.4.0
 	$(QUOTE)C:\Program Files (x86)\Atmel\Studio\7.0\toolchain\avr8\avr8-gnu-toolchain\bin\avr-gcc.exe$(QUOTE)  -x c -funsigned-char -funsigned-bitfields -DDEBUG -DF_CPU=16000000  -I"C:\Program Files (x86)\Atmel\Studio\7.0\Packs\atmel\ATmega_DFP\1.7.374\include"  -Og -ffunction-sections -fdata-sections -fpack-struct -fshort-enums -g2 -Wall -mmcu=atmega32m1 -B "C:\Program Files (x86)\Atmel\Studio\7.0\Packs\atmel\ATmega_DFP\1.7.374\gcc\dev\atmega32m1" -c -std=gnu99 -MD -MP -MF "$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -MT"$(@:%.o=%.o)"   -o "$@" "$<" 

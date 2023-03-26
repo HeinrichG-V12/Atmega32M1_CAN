@@ -38,7 +38,7 @@ void can_network_init (uint8_t mode)
 void can_send_message (void)
 {
 	st_cmd_t message;
-	message.id.ext = 0x180;
+	message.id.ext = 0x1AC;
 	message.ctrl.ide = 1;
 	message.ctrl.rtr = 0;
 	message.dlc = 2;

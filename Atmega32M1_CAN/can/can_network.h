@@ -39,6 +39,7 @@ typedef union
 
 
 void can_network_init (uint8_t mode);
+void can_send_message (void);
 
 
 #endif /* CAN_NETWORK_H_ */

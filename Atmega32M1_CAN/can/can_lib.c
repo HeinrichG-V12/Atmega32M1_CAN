@@ -66,7 +66,10 @@ uint8_t can_init(uint8_t mode)
     can_clear_all_mob();                        // c.f. function in "can_drv.c"
 	
 	CANIE2 = (1 << IEMOB0);   			// Enable interrupts on mob1 for reception and transmission
-	CANGIE = (1 << ENIT)|(1 <<  ENRX);	// Enable interrupts on receive
+	CANIE1 = 0x00;
+	// CANGIE = (1 <<  ENRX);				// Enable interrupts on receive
+	
+	CANGIE = 0xFE;						// enable all , except overrun
 	
 	CANIDM1 = 0x00;   	// Clear Mask, let all IDs pass    
 	CANIDM2 = 0x00; 	//  " "
@@ -331,5 +334,15 @@ uint8_t can_get_status (st_cmd_t* cmd)
 
 ISR (CAN_INT_vect)
 {
-	testVar++;	
+	uint8_t reg = CANSTMOB;
+	
+	if (reg & (1 << TXOK))
+	{
+		testVar++;
+	}
+		
+	if (reg & (1 << RXOK))
+	{
+		testVar++;
+	}
 }

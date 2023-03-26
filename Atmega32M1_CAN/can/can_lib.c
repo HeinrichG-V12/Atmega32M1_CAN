@@ -69,7 +69,7 @@ uint8_t can_init(uint8_t mode)
 	CANIE1 = 0x00;
 	// CANGIE = (1 <<  ENRX);				// Enable interrupts on receive
 	
-	CANGIE = 0xFE;						// enable all , except overrun
+	CANGIE = 0xFE;						// enable all, except AERR, Acknowledgment Error
 	
 	CANIDM1 = 0x00;   	// Clear Mask, let all IDs pass    
 	CANIDM2 = 0x00; 	//  " "

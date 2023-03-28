@@ -93,9 +93,6 @@ uint8_t can_init(uint8_t mode)
     Can_enable();                               // c.f. macro in "can_drv.h" 
 	testVar = 0;
 	
-	
-	while (!(CANGSTA & (1<<ENFG)));						/* wait until module ready */
-	
     return (1);
 }
 

@@ -37,6 +37,14 @@
 //_____ D E F I N I T I O N S __________________________________________________
 
 volatile uint16_t testVar;
+volatile st_cmd_t can_receive_buffer[CAN_RECEIVED_BUFFER_SIZE];
+volatile uint8_t iPtr = 0, oPtr = 0;
+
+/*
+volatile st_cmd_t receivedMessages[CAN_RECEIVED_BUFFER_SIZE];
+volatile uint8_t iPtr = 0;
+volatile uint8_t oPtr = 0;
+*/
 
 //_____ F U N C T I O N S ______________________________________________________
 
@@ -61,23 +69,33 @@ volatile uint16_t testVar;
 //!
 //------------------------------------------------------------------------------
 uint8_t can_init(uint8_t mode)
-{
+{	
     if ((Can_bit_timing(mode))==0) return (0);  // c.f. macro in "can_drv.h"
     can_clear_all_mob();                        // c.f. function in "can_drv.c"
 	
-	CANIE2 = (1 << IEMOB0);   			// Enable interrupts on mob1 for reception and transmission
-	CANIE1 = 0x00;
-	// CANGIE = (1 <<  ENRX);				// Enable interrupts on receive
+	// we configure  MOB0 as receive mob
+	CANPAGE = (0<<4);									/* pick mob0 */
+	CANCDMOB &= ~((1<<CONMOB1)|(1<<CONMOB0));			/* disable mob */
+	CANCDMOB |= (1 << CONMOB1);							/* enable reception */
 	
-	CANGIE = 0xFE;						// enable all, except AERR, Acknowledgment Error
+	// interrupts
+	CANGIE = (1 << ENIT)|(1 << ENRX);					/* enable ENIT and ENRX */
+	CANIE2 |= (1 << IEMOB0);   							/* Enable interrupts on mob0 */
+	CANIE1 = 0;
+	CANSIT1 = 0;
+	CANSIT2 = 0;
 	
 	CANIDM1 = 0x00;   	// Clear Mask, let all IDs pass    
 	CANIDM2 = 0x00; 	//  " "
 	CANIDM3 = 0x00; 	//  " "
-	CANIDM4 = 0x00; 	//  " "    	
+	CANIDM4 = 0x00; 	//  " "
 	
     Can_enable();                               // c.f. macro in "can_drv.h" 
 	testVar = 0;
+	
+	
+	while (!(CANGSTA & (1<<ENFG)));						/* wait until module ready */
+	
     return (1);
 }
 
@@ -331,18 +349,42 @@ uint8_t can_get_status (st_cmd_t* cmd)
     return (rtn_val);
 }
 
-
 ISR (CAN_INT_vect)
 {
-	uint8_t reg = CANSTMOB;
+	uint8_t tmpPage = 0;
 	
-	if (reg & (1 << TXOK))
+	tmpPage = CANPAGE;				/* save current mob */
+	CANPAGE = CANHPMOB & 0xF0;		/* selects MOB with highest priority interrupt */
+
+	if (CANSTMOB & (1 << RXOK))
 	{
-		testVar++;
-	}
+		if (Can_get_ide()) // if extended frame
+		{
+			can_receive_buffer[iPtr].ctrl.ide = 1;
+			Can_get_ext_id(can_receive_buffer[iPtr].id.ext);
+		}
+		else // else standard frame
+		{
+			can_receive_buffer[iPtr].ctrl.ide = 0;
+			Can_get_std_id(can_receive_buffer[iPtr].id.std);
+		}
 		
-	if (reg & (1 << RXOK))
-	{
-		testVar++;
+		can_receive_buffer[iPtr].status = can_get_mob_status();
+		can_receive_buffer[iPtr].dlc = Can_get_dlc();
+		can_receive_buffer[iPtr].ctrl.rtr = Can_get_rtr();
+		can_get_data(can_receive_buffer[iPtr].pt_data);
+		
+		iPtr++;
+		if (iPtr == CAN_RECEIVED_BUFFER_SIZE)
+		{
+			iPtr = 0;
+		}
+		
+		CANCDMOB = (1 << CONMOB1);
 	}
+	
+	CANSTMOB = 0x00;
+	CANPAGE = tmpPage;
 }
+
+ISR (CAN_TOVF_vect) {}

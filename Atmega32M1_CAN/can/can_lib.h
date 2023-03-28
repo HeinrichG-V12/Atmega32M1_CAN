@@ -55,6 +55,9 @@
 // @brief This constant is used as return value for "can_get_status" function.
 #define CAN_STATUS_ERROR         0x02
 
+// @brief This constant is used to define the size of buffer for received messages
+#define CAN_RECEIVED_BUFFER_SIZE	8
+
 // ----------
 // @brief This enumeration is used to select an action for a specific message
 // declared in st_cmd_t structure.

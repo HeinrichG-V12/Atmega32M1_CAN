@@ -44,7 +44,7 @@ void can_send_message (void)
 	message.dlc = 2;
 	message.cmd = CMD_TX_DATA;
 	uint8_t pt_data[message.dlc];
-	pt_data[0] = 0x00;
+	pt_data[0] = 0xEE;
 	pt_data[1] = 0xFF;
 	message.pt_data = &pt_data[0];
 	

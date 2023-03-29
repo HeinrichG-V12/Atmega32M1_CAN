@@ -36,15 +36,8 @@
 
 //_____ D E F I N I T I O N S __________________________________________________
 
-volatile uint16_t testVar;
 volatile st_cmd_t can_receive_buffer[CAN_RECEIVED_BUFFER_SIZE];
 volatile uint8_t iPtr = 0, oPtr = 0;
-
-/*
-volatile st_cmd_t receivedMessages[CAN_RECEIVED_BUFFER_SIZE];
-volatile uint8_t iPtr = 0;
-volatile uint8_t oPtr = 0;
-*/
 
 //_____ F U N C T I O N S ______________________________________________________
 
@@ -85,16 +78,51 @@ uint8_t can_init(uint8_t mode)
 	CANSIT1 = 0;
 	CANSIT2 = 0;
 	
+	can_filter_t filter;	
+	
 	CANIDM1 = 0x00;   	// Clear Mask, let all IDs pass    
 	CANIDM2 = 0x00; 	//  " "
 	CANIDM3 = 0x00; 	//  " "
 	CANIDM4 = 0x00; 	//  " "
 	
-    Can_enable();                               // c.f. macro in "can_drv.h" 
-	testVar = 0;
+    Can_enable();                               // c.f. macro in "can_drv.h"
 	
     return (1);
 }
+
+uint8_t can_set_filter (uint8_t number, const can_filter_t* filter)
+{
+	if (number > NB_MOB)
+	{
+		return NO_MOB;
+	}
+	
+	// go to standby!
+	
+	CANPAGE = (number << 4);
+	CANSTMOB = 0;
+	CANCDMOB = 0;
+	
+	
+	
+	if (filter->ctrl.ide)
+	{
+		// extended identifier
+		CANIDT4 = (uint8_t)  filter->id.ext << 3;
+		CANIDT3 = 			 filter->id.ext >> 5;
+		CANIDT2 =            filter->id.ext >> 13;
+		CANIDT1 =            filter->id.ext >> 21;
+		
+		CANIDM4 = ((uint8_t) filter->mask.ext_mask << 3) | (1 << IDEMSK);
+		CANIDM3 = 			 filter->mask.ext_mask >> 5;
+		CANIDM2 =            filter->mask.ext_mask >> 13;
+		CANIDM1 =            filter->mask.ext_mask >> 21;
+	}
+	
+	
+	return CAN_CMD_ACCEPTED;
+}
+
 
 //------------------------------------------------------------------------------
 //  @fn can_cmd

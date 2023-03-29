@@ -86,6 +86,11 @@ typedef union{
   uint8_t  tab[4];
 } can_id_t; 
 
+typedef union {
+	uint32_t ext_mask;
+	uint16_t std_mask;	
+} can_mask_t;
+
 // ----------
 // @brief This structure defines some specific information as RTR bit and
 // IDE bit
@@ -116,6 +121,11 @@ typedef  struct{
   can_ctrl_t ctrl;   
 } st_cmd_t;
 
+typedef struct {
+	can_id_t   id;
+	can_mask_t mask;
+	can_ctrl_t ctrl;
+} can_filter_t;
 
 //_____ D E C L A R A T I O N S ________________________________________________
 
@@ -176,6 +186,8 @@ extern uint8_t can_cmd (st_cmd_t *);
 //!                                    CAN communication
 //!
 extern uint8_t can_get_status (st_cmd_t *); 
+
+extern uint8_t can_set_filter (uint8_t number, const can_filter_t *filter);
 
 //______________________________________________________________________________
 
